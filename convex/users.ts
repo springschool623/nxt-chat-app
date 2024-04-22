@@ -80,7 +80,9 @@ export const getUsers = query({
       throw new ConvexError('Unauthorized')
     }
     const users = await ctx.db.query('users').collect()
-    return users
+    return users.filter(
+      (user) => user.tokenIdentifier !== identity.tokenIdentifier
+    )
   },
 })
 
