@@ -1,4 +1,4 @@
-import { Laugh, Mic, Plus, Send } from 'lucide-react'
+import { Laugh, Mic, Plus, Pointer, Send } from 'lucide-react'
 import { Input } from '../ui/input'
 import { useState } from 'react'
 import { Button } from '../ui/button'
@@ -12,27 +12,35 @@ import EmojiPicker, {
   SuggestionMode,
   Theme,
 } from 'emoji-picker-react'
+import MediaDropdown from './media-dropdown'
 
 const MessageInput = () => {
   const [msgText, setMsgText] = useState('')
   const { selectedConversation } = useConversationStore()
+  const [isLoading, setIsLoading] = useState(false)
   const { ref, isComponentVisible, setIsComponentVisible } =
     useComponentVisible(false)
 
-  const sendTextMsg = useMutation(api.messages.sendTextMessage)
   const me = useQuery(api.users.getMe)
+  const sendTextMsg = useMutation(api.messages.sendTextMessage)
 
   const handleSendTextMsg = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsLoading(true)
     try {
-      await sendTextMsg({
-        content: msgText,
-        conversation: selectedConversation!._id,
-        sender: me!._id,
-      })
+      if (msgText != '') {
+        await sendTextMsg({
+          content: msgText,
+          conversation: selectedConversation!._id,
+          sender: me!._id,
+        })
+        setMsgText('')
+      }
     } catch (err: any) {
       toast.error(err.message)
       console.error(err)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -56,11 +64,10 @@ const MessageInput = () => {
               }}
             />
           )}
-          <Laugh className="text-gray-600 dark:text-gray-400" />
+          <Laugh className="text-gray-600 dark:text-gray-400 cursor-pointer" />
         </div>
-        <Plus className="text-gray-600 dark:text-gray-400" />
+        <MediaDropdown />
       </div>
-      <Plus />
       <form onSubmit={handleSendTextMsg} className="w-full flex gap-3">
         <div className="flex-1">
           <Input
@@ -77,6 +84,7 @@ const MessageInput = () => {
               type="submit"
               size={'sm'}
               className="bg-transparent text-foreground hover:bg-transparent"
+              disabled={isLoading}
             >
               <Send />
             </Button>

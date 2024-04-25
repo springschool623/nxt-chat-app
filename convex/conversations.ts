@@ -17,9 +17,12 @@ export const createConversation = mutation({
     const existingConversation = await ctx.db
       .query('conversations')
       .filter((q) =>
-        q.or(
-          q.eq(q.field('participants'), args.participants),
-          q.eq(q.field('participants'), args.participants.reverse())
+        q.and(
+          q.or(
+            q.eq(q.field('participants'), args.participants),
+            q.eq(q.field('participants'), args.participants.reverse())
+          ),
+          q.eq(q.field('groupName'), args.groupName)
         )
       )
       .first()
