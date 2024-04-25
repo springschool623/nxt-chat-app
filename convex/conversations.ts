@@ -54,7 +54,6 @@ export const getMyConversations = query({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity()
     if (!identity) throw new ConvexError('Unauthorized')
-
     const user = await ctx.db
       .query('users')
       .withIndex('by_tokenIdentifier', (q) =>
